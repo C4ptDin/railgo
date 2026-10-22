@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, NavLink, Route, Routes, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowDownUp, ArrowRight, Bookmark, CalendarDays, Check, ChevronDown, Clock3, Compass, MapPin, Menu, Minus, Plus, Search, SlidersHorizontal, TrainFront, Trash2, Users, X } from 'lucide-react';
+import { ArrowDownUp, ArrowRight, Bookmark, CalendarDays, Check, ChevronDown, Clock3, Compass, MapPin, Menu, Plus, Search, SlidersHorizontal, TrainFront, Users, X } from 'lucide-react';
 import { journeys, stations, formatDuration, type Journey } from './data';
 
 type SearchForm = { origin: string; destination: string; date: string; passengers: number };
@@ -68,7 +68,7 @@ function JourneyCard({journey,saved,onSave,compact=false}:{journey:Journey;saved
     </div><div className="journey-side"><div className="fare"><small>Sample fare / person</small><strong>RM {journey.fare.toFixed(2)}</strong></div><div className="card-actions"><button className={saved?'save-button saved':'save-button'} onClick={onSave} aria-label={saved?'Remove saved journey':'Save journey'} title={saved?'Remove saved journey':'Save journey'}>{saved?<Check size={16}/>:<Bookmark size={16}/>}</button><Link className="details-button" to={'/journeys/'+journey.id}>View journey <ArrowRight size={15}/></Link></div></div>
   </article>;
 }
-function Home({saved,onSave}:{saved:string[];onSave:(id:string)=>void}) {
+function Home({onSave}:{saved:string[];onSave:(id:string)=>void}) {
   const navigate=useNavigate();
   return <><main><section className="hero"><div className="hero-grid"><div className="hero-copy"><div className="eyebrow"><span className="eyebrow-line"/> YOUR NEXT JOURNEY STARTS HERE</div><h1>Less planning.<br/><em>More going.</em></h1><p className="hero-description">A clearer way to explore rail journeys across Malaysia. Compare your options, find your rhythm, and keep every plan in one place.</p><div className="hero-points"><span><Check size={15}/> Compare journey options</span><span><Check size={15}/> Save plans for later</span></div><div className="hero-note"><span className="status-dot"/> Independent planning prototype <span className="note-divider"/> Sample data only</div></div>
       <div className="hero-visual"><img src="https://images.unsplash.com/photo-1474487548417-781cb71495f3?auto=format&fit=crop&w=1200&q=85" alt="Railway tracks stretching into a green landscape" /><div className="visual-shade"/><div className="image-caption"><span className="caption-kicker">THE JOY IS IN THE JOURNEY</span><strong>Take the scenic route.</strong><span>Explore Malaysia, one stop at a time.</span></div><div className="floating-stamp"><Compass size={20}/><span>YOUR ROUTE,<br/><b>YOUR PACE</b></span></div></div>
@@ -116,7 +116,7 @@ function App() {
  const [toast,setToast]=useState('');
  useEffect(()=>{localStorage.setItem(SAVED_KEY,JSON.stringify(saved));},[saved]);
  function toggleSaved(id:string){const exists=saved.includes(id);setSaved(old=>exists?old.filter(x=>x!==id):[...old,id]);setToast(exists?'Journey removed from My Trips':'Journey saved to My Trips');window.setTimeout(()=>setToast(''),2400);}
- useEffect(()=>{if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;import('gsap').then(({gsap})=>{const ctx=gsap.context(()=>{gsap.fromTo('.hero-copy > *',{y:14,opacity:0},{y:0,opacity:1,duration:.55,stagger:.07,ease:'power2.out',clearProps:'all'});});return()=>ctx.revert();});},[]);
+ useEffect(()=>{if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;let ctx:{revert:()=>void}|undefined;let cancelled=false;import('gsap').then(({gsap})=>{if(cancelled)return;ctx=gsap.context(()=>{gsap.fromTo('.hero-copy > *',{y:14,opacity:0},{y:0,opacity:1,duration:.55,stagger:.07,ease:'power2.out',clearProps:'all'});});});return()=>{cancelled=true;ctx?.revert();};},[]);
  return <><Header/><Routes><Route path="/" element={<Home saved={saved} onSave={toggleSaved}/>}/><Route path="/journeys" element={<Results saved={saved} onSave={toggleSaved}/>}/><Route path="/journeys/:journeyId" element={<Details saved={saved} onSave={toggleSaved}/>}/><Route path="/my-trips" element={<MyTrips saved={saved} onSave={toggleSaved}/>}/><Route path="/profile" element={<Profile/>}/><Route path="*" element={<main className="page-shell empty-state"><h1>Page not found</h1><Link to="/" className="primary-button">Return home</Link></main>}/></Routes><Footer/>{toast&&<div className="toast" role="status"><Check size={17}/>{toast}</div>}<Link to="/profile" className="floating-profile" aria-label="Preferences"><SlidersHorizontal size={18}/></Link></>;
 }
 export default App;
