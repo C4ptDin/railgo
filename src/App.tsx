@@ -24,7 +24,7 @@ function Header() {
     </nav>
   </div></header>;
 }
-function Footer() { return <footer className="footer"><div className="footer-inner"><Link to="/" className="brand"><span className="brand-mark"><TrainFront size={18}/></span><span>RAILFLOW<span className="brand-dot">.</span></span></Link><p>Thoughtful planning for the journeys ahead.</p><div className="footer-bottom"><span>Independent journey-planning prototype</span><span>All schedules and fares are illustrative sample data.</span></div></div></footer>; }
+function Footer() { return <footer className="footer"><div className="footer-inner"><Link to="/" className="brand"><span className="brand-mark"><TrainFront size={18}/></span><span>RAILFLOW<span className="brand-dot">.</span></span></Link><p>Thoughtful planning for the journeys ahead.</p><div className="footer-bottom"><span>Independent journey-planning prototype · <Link to="/profile">Preferences</Link></span><span>All schedules and fares are illustrative sample data.</span></div></div></footer>; }
 
 function StationField({ label, value, onChange, exclude }: {label:string;value:string;onChange:(v:string)=>void;exclude:string}) {
   const [query, setQuery] = useState(value);
@@ -37,7 +37,8 @@ function StationField({ label, value, onChange, exclude }: {label:string;value:s
 }
 function SearchPanel({ compact=false, onSearch }: {compact?:boolean;onSearch?:(f:SearchForm)=>void}) {
   const navigate = useNavigate();
-  const [form,setForm] = useState<SearchForm>(initialSearch);
+  const [params] = useSearchParams();
+  const [form,setForm] = useState<SearchForm>(()=>({origin:params.get('from')||initialSearch.origin,destination:params.get('to')||initialSearch.destination,date:params.get('date')||today(),passengers:Number(params.get('pax')||1)}));
   const [error,setError] = useState('');
   const update = (key:keyof SearchForm,value:string|number) => setForm(old=>({...old,[key]:value}));
   function submit(e:React.FormEvent) {
@@ -76,7 +77,7 @@ function Home({onSave}:{saved:string[];onSave:(id:string)=>void}) {
     <section className="section featured-section"><div className="section-heading"><div><span className="section-kicker">A LITTLE INSPIRATION</span><h2>Popular ways to go</h2><p>Explore sample connections between places worth the trip.</p></div><Link to="/journeys" className="text-link">Explore all journeys <ArrowRight size={16}/></Link></div>
       <div className="featured-grid">{[{from:'KL Sentral',to:'Ipoh',time:'~ 2h 26m',fare:'From RM 22',image:'photo-1519681393784-d120267933ba',tag:'CITY TO HIGHLANDS'},{from:'Butterworth',to:'KL Sentral',time:'~ 4h 08m',fare:'From RM 52',image:'photo-1500530855697-b586d89ba3ee',tag:'COAST TO CAPITAL'},{from:'Alor Setar',to:'Butterworth',time:'~ 1h 19m',fare:'From RM 16',image:'photo-1501785888041-af3ef285b470',tag:'A SHORT ESCAPE'}].map((r,i)=><button key={r.from+r.to} className="featured-card" onClick={()=>navigate('/journeys?'+new URLSearchParams({from:r.from,to:r.to,date:today(),pax:'1'}))}><div className="featured-image"><img src={'https://images.unsplash.com/'+r.image+'?auto=format&fit=crop&w=700&q=75'} alt="" loading="lazy"/><span>{r.tag}</span><span className="feature-arrow"><ArrowRight size={17}/></span></div><div className="featured-body"><div><small>{r.from}</small><strong>{r.to}</strong></div><div className="featured-time">{r.time}<small>{r.fare}</small></div></div></button>)}</div>
     </section><section className="how-section"><div className="how-intro"><span className="section-kicker">A BETTER WAY TO PLAN</span><h2>Three steps.<br/><em>One smoother trip.</em></h2><p>From first thought to final stop, keep the details simple and the possibilities open.</p></div><div className="steps">{[{n:'01',title:'Search',desc:'Choose your stations, date and travel party.'},{n:'02',title:'Compare',desc:'Review sample times, durations and fares side by side.'},{n:'03',title:'Save',desc:'Keep the journeys you like close at hand.'}].map(s=><div className="step" key={s.n}><span>{s.n}</span><div><h3>{s.title}</h3><p>{s.desc}</p></div><ArrowRight size={18}/></div>)}</div></section>
-    </main><Footer/></>;
+    </main></>;
 }
 function Results({saved,onSave}:{saved:string[];onSave:(id:string)=>void}) {
   const [params,setParams]=useSearchParams();
